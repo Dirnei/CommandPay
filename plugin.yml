@@ -7,4 +7,4 @@ commands:
   cp:
     description: Gibt Info ueber die Befehle
     usage: |
-        cp set [command] <price> - Setzt den Preis des Befehls
+        cp set [command] <price> - It doesn't work yet
