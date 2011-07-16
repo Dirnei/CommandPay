@@ -19,7 +19,7 @@ public class iConomyServer extends ServerListener {
         if (plugin.iConomy != null) {
             if (event.getPlugin().getDescription().getName().equals("iConomy")) {
                 plugin.iConomy = null;
-                plugin.log.info("[CommandPay] Von iConomy ausgeloggt!");
+                plugin.log.info("[CommandPay] Logout from iConomy!");
             }
         }
     }
@@ -32,7 +32,7 @@ public class iConomyServer extends ServerListener {
             if (iConomy != null) {
                 if (iConomy.isEnabled() && iConomy.getClass().getName().equals("com.iConomy.iConomy")) {
                     plugin.iConomy = (iConomy)iConomy;
-                    plugin.log.info("[CommandPay] In iConomy eingeloggt!");
+                    plugin.log.info("[CommandPay] Hooked into iConomy");
                 }
             }
         }
