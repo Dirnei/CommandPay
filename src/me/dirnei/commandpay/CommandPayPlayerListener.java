@@ -14,6 +14,11 @@ public final CommandPay plugin;
 	}
 	
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event){
+		
+		if( plugin.permissionHandler.has(event.getPlayer(), "commandpay.free")){
+			return;
+		}
+		
 		String befehl = "";
 		Configuration conf = plugin.getConfiguration();
 		conf.load();
