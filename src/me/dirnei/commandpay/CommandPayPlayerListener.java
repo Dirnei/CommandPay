@@ -1,5 +1,6 @@
 package me.dirnei.commandpay;
 
+import org.bukkit.ChatColor;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.util.config.Configuration;
@@ -16,6 +17,7 @@ public final CommandPay plugin;
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event){
 		
 		if( plugin.permissionHandler.has(event.getPlayer(), "commandpay.free")){
+			event.getPlayer().sendMessage(ChatColor.AQUA + "[CommandPay]" + ChatColor.WHITE + plugin.getConfiguration().getProperty("messages.free").toString());
 			return;
 		}
 		
@@ -42,7 +44,7 @@ public final CommandPay plugin;
 					Double geld = Double.valueOf(befehl);
 					
 					String out = com.iConomy.iConomy.format(geld);
-					event.getPlayer().sendMessage(conf.getProperty("messages.pay").toString().replace("%money", out));
+					event.getPlayer().sendMessage(ChatColor.AQUA+ "[CommandPay]" + ChatColor.WHITE + conf.getProperty("messages.pay").toString().replace("%money", out));
 				}
 			}
 		}	
