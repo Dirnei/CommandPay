@@ -1,6 +1,8 @@
 package me.dirnei.commandpay;
 
 import org.bukkit.ChatColor;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.util.config.Configuration;
@@ -15,38 +17,106 @@ public final CommandPay plugin;
 	}
 	
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event){
-		
-		if( plugin.permissionHandler.has(event.getPlayer(), "commandpay.free")){
-			event.getPlayer().sendMessage(ChatColor.AQUA + "[CommandPay]" + ChatColor.WHITE + plugin.getConfiguration().getProperty("messages.free").toString());
+		//get the command-list
+				String commandList = "";
+				Configuration conf = plugin.getConfiguration();
+				conf.load();
+				commandList = conf.getProperty("commands.list").toString();
+				
+				
+		//command for free if you have the permission
+		if( plugin.permissionHandler.has(event.getPlayer(), "commandpay.free") && conf.getProperty("message.free").toString() == "true" ){
+			event.getPlayer().sendMessage(ChatColor.AQUA + "[CommandPay] " + ChatColor.WHITE + plugin.getConfiguration().getProperty("messages.free").toString());
+			return;
+		}else if(plugin.permissionHandler.has(event.getPlayer(), "commandpay.free") && conf.getProperty("message.free").toString() == "false"){
 			return;
 		}
 		
-		String befehl = "";
-		Configuration conf = plugin.getConfiguration();
-		conf.load();
-		befehl = conf.getProperty("commands.list").toString();
+		//if plugin enabled
 		if (conf.getProperty("enabled").toString() == "true"){
-			if(befehl.contains(event.getMessage())){
+			Player player = event.getPlayer();
+			
+			World world = player.getWorld();
+			
+			player.sendMessage("Du bist in: " + world.getName());
+			//get argument from command
+			String after = event.getMessage();
+			int argsCount = event.getMessage().length() - after.length();
+			String commandArgs[] = new String[argsCount+1];
+			
+			commandArgs = after.split(" ");
+			
+			argsCount = commandArgs.length;
+			
+			if(commandList.contains(commandArgs[0])){
 				
-				befehl = befehl.substring(befehl.indexOf(event.getMessage()));
+				//delete []
+				commandList = commandList.replace("[", "");
+				commandList = commandList.replace("]", "");
+				
+				//get comment args
+				String command = commandList.substring(commandList.indexOf(commandArgs[0]));
+				
+				command = command.substring(0, command.indexOf('|'));
+				command = command.substring(command.indexOf("(")+1,command.indexOf(")"));
+				String samount = "";
+				
+				 samount = commandList.substring(commandList.indexOf(commandArgs[0]));
+				samount = samount.substring(samount.indexOf('|'));
 				try{
-					befehl = befehl.substring(0, befehl.indexOf(','));
-				}
-				catch(Exception e){
-					befehl = befehl.substring(0, befehl.indexOf(']'));
-				}
-				
-				befehl = befehl.substring(befehl.indexOf('|')+1).trim();
-				
-				Holdings balance = com.iConomy.iConomy.getAccount(event.getPlayer().getName()).getHoldings();
-				balance.subtract(Integer.valueOf(befehl));
-				if(conf.getProperty("message").toString() == "true"){
-					Double geld = Double.valueOf(befehl);
+				samount = samount.substring(0, samount.indexOf(','));
+				}catch(Exception e){
 					
-					String out = com.iConomy.iConomy.format(geld);
-					event.getPlayer().sendMessage(ChatColor.AQUA+ "[CommandPay]" + ChatColor.WHITE + conf.getProperty("messages.pay").toString().replace("%money", out));
 				}
+				samount = samount.replace("|", "").trim();
+				double amount = Double.valueOf(samount);
+				
+				
+				
+				if(commandArgs.length > 1 ){
+					if(command.contains(commandArgs[1]) || command.contains("*")){
+						if(payCommand(player, amount) == false){
+							event.setCancelled(true);
+						}
+					}else{
+					}
+				}else if(command.contains("*")){
+					if(payCommand(player, amount) == false){
+						event.setCancelled(true);
+					}
+				}else{
+					if(conf.getProperty("message.free").toString() == "true"){
+						player.sendMessage(ChatColor.AQUA + "[CommandPay] " + ChatColor.WHITE + conf.getProperty("messages.free").toString());
+					}
+				}
+				
 			}
 		}	
+	}
+	
+	public boolean payCommand(Player player, double amount){
+		Configuration conf = plugin.getConfiguration();
+		conf.load();
+		//get holdings
+		Holdings balance = com.iConomy.iConomy.getAccount(player.getName()).getHoldings();
+		//if enough money
+		if(balance.balance() > amount){
+			
+			//pay
+			balance.subtract(amount);
+			if(conf.getProperty("message.pay").toString() == "true"){
+				
+				String out = com.iConomy.iConomy.format(amount);
+				player.sendMessage(ChatColor.AQUA+ "[CommandPay] " + ChatColor.WHITE + conf.getProperty("messages.pay").toString().replace("%money", out));
+			}
+		}else{
+			//not enough / cancel
+			if(conf.getProperty("message.notenough").toString() == "true"){
+				player.sendMessage(ChatColor.AQUA + "[CommandPay] " + ChatColor.WHITE + conf.getProperty("messages.notenough").toString());
+				return false;
+			}
+		}
+		
+		return true;
 	}
 }

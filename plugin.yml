@@ -1,10 +1,10 @@
 name: CommandPay
 main: me.dirnei.commandpay.CommandPay
-version: 0.2
+version: 0.4.1
 author: Dirnei
 description: Payment for Commands
 commands:
   cp:
-    description: Gibt Info ueber die Befehle
+    description: Does nothing yet
     usage: |
-        cp set [command] <price> - Setzt den Preis des Befehls
+        cp set [command] <price> - dont work
